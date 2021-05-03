@@ -269,17 +269,25 @@ class Bar {
   }
   drawBar() {
     this.AxisY.call(d3.axisLeft(this.y));
-    this.DrawArea.selectAll("rect")
+    let bar = this.DrawArea.selectAll("rect")
       .data(this.BarData)
       .join("rect")
-      .attr("class", (d, i) => "day" + d.fxDate) //设置一个类名,方便后续调用
+      .attr("class", (d, i) => "day" + d.fxDate); //设置一个类名,方便后续调用
+
+    bar
       .attr("x", (d, i) => this.x(d.fxDate))
-      .attr("y", (d) => this.y(+d.tempMax))
+
       .attr("width", this.x.bandwidth())
+      .attr("y", this.innerH)
+      .transition()
+      .duration(1200)
+      .attr("y", (d) => this.y(+d.tempMax))
       .attr("height", (d) => this.innerH - this.y(+d.tempMax))
       .attr("stroke", "black")
       .attr("stroke-width", "0.25")
-      .attr("fill", "royalblue")
+      .attr("fill", "royalblue");
+
+    bar
       .on("mouseover", (e, v) => {
         // add mouseover event reference: https://www.d3-graph-gallery.com/graph/interactivity_tooltip.html
         d3.select(".tip")
@@ -303,7 +311,11 @@ class Bar {
       .data(this.BarData)
       .join("text")
       .attr("class", "labelsText") //设置一个类名,方便后续调用
+    
       .attr("x", (d, i) => this.x(d.fxDate) + this.x.bandwidth() / 2)
+      .attr("y", this.innerH)
+      .transition()
+      .duration(1200)
       .attr("y", (d) => this.y(+d.tempMax))
       .text((d) => d3.format(".1f")(32 + d.tempMax * 1.8) + "°F")
       .attr("text-anchor", "middle");
@@ -409,6 +421,7 @@ d3.select("#cities").on("change", async (e) => {
 
 async function getData(city) {
   let url2 = `https://api.qweather.com/v7/weather/7d?location=${city}&key=d27aefe94c044c64be6b119fde6d57b9&lang=en`;
+
   weatherdata = await d3.json(url2);
   weatherdata = weatherdata.daily;
   return weatherdata;
